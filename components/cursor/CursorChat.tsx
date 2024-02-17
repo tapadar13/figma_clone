@@ -1,6 +1,6 @@
+import React from "react";
 import CursorSVG from "@/public/assets/public/assets/CursorSVG";
 import { CursorChatProps, CursorMode } from "@/types/type";
-import React from "react";
 
 const CursorChat = ({
   cursor,
