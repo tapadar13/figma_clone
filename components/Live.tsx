@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
 import {
@@ -85,8 +87,6 @@ const Live = () => {
       } else if (e.key === "Escape") {
         updateMyPresence({ message: "" });
         setCursorState({ mode: CursorMode.Hidden });
-      } else if (e.key === "e") {
-        setCursorState({ mode: CursorMode.ReactionSelector });
       } else if (e.key === "e") {
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
