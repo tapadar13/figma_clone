@@ -1,9 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
-import { useMyPresence, useOthers } from "@/liveblocks.config";
-import { CursorMode, CursorState, Reaction } from "@/types/type";
+import {
+  useBroadcastEvent,
+  useEventListener,
+  useMyPresence,
+  useOthers,
+} from "@/liveblocks.config";
+import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
 import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButton";
+import useInterval from "@/public/assets/hooks/useInterval";
+import FlyingReaction from "./reaction/FlyingReaction";
 
 const Live = () => {
   const others = useOthers();
@@ -16,6 +23,55 @@ const Live = () => {
 
   // store the reactions created on mouse click
   const [reaction, setReaction] = useState<Reaction[]>([]);
+
+  const broadcast = useBroadcastEvent();
+
+  // Remove reactions that are not visible anymore (every 1 sec)
+  useInterval(() => {
+    setReaction((reaction) =>
+      reaction.filter((r) => r.timestamp > Date.now() - 4000)
+    );
+  }, 1000);
+
+  useInterval(() => {
+    if (
+      cursorState.mode === CursorMode.Reaction &&
+      cursorState.isPressed &&
+      cursor
+    ) {
+      // concat all the reactions created on mouse click
+      setReaction((reactions) =>
+        reactions.concat([
+          {
+            point: { x: cursor.x, y: cursor.y },
+            value: cursorState.reaction,
+            timestamp: Date.now(),
+          },
+        ])
+      );
+
+      // Broadcast the reaction to other users
+      broadcast({
+        x: cursor.x,
+        y: cursor.y,
+        value: cursorState.reaction,
+      });
+    }
+  }, 100);
+
+  // Listen to events broadcasted by other users
+  useEventListener((eventData) => {
+    const event = eventData.event as ReactionEvent;
+    setReaction((reactions) =>
+      reactions.concat([
+        {
+          point: { x: event.x, y: event.y },
+          value: event.value,
+          timestamp: Date.now(),
+        },
+      ])
+    );
+  });
 
   // Listen to keyboard events to change the cursor state
   useEffect(() => {
@@ -133,6 +189,17 @@ const Live = () => {
       onPointerUp={handlePointerUp}
     >
       <h1 className="font-2xl text-white">Liveblocks Figma Clone</h1>
+
+      {/* Render the reactions */}
+      {reaction.map((r) => (
+        <FlyingReaction
+          key={r.timestamp.toString()}
+          x={r.point.x}
+          y={r.point.y}
+          timestamp={r.timestamp}
+          value={r.value}
+        />
+      ))}
 
       {/* If cursor is in chat mode, show the chat cursor */}
       {cursor && (
