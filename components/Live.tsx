@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
 import { useMyPresence, useOthers } from "@/liveblocks.config";
-import { CursorMode, CursorState } from "@/types/type";
+import { CursorMode, CursorState, Reaction } from "@/types/type";
 import CursorChat from "./cursor/CursorChat";
+import ReactionSelector from "./reaction/ReactionButton";
 
 const Live = () => {
   const others = useOthers();
@@ -12,6 +13,9 @@ const Live = () => {
   const [cursorState, setCursorState] = useState<CursorState>({
     mode: CursorMode.Hidden,
   });
+
+  // store the reactions created on mouse click
+  const [reaction, setReaction] = useState<Reaction[]>([]);
 
   // Listen to keyboard events to change the cursor state
   useEffect(() => {
@@ -25,6 +29,8 @@ const Live = () => {
       } else if (e.key === "Escape") {
         updateMyPresence({ message: "" });
         setCursorState({ mode: CursorMode.Hidden });
+      } else if (e.key === "e") {
+        setCursorState({ mode: CursorMode.ReactionSelector });
       } else if (e.key === "e") {
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
@@ -45,21 +51,31 @@ const Live = () => {
     };
   }, [updateMyPresence]);
 
+  const setReactions = useCallback((reaction: string) => {
+    setCursorState({
+      mode: CursorMode.Reaction,
+      reaction,
+      isPressed: false,
+    });
+  }, []);
+
   // Listen to mouse events to change the cursor state
   const handlePointerMove = useCallback((event: React.PointerEvent) => {
     event.preventDefault();
 
-    // get the cursor position in the canvas
-    const x = event.clientX - event.currentTarget.getBoundingClientRect().x;
-    const y = event.clientY - event.currentTarget.getBoundingClientRect().y;
+    if (cursor == null || cursorState.mode !== CursorMode.ReactionSelector) {
+      // get the cursor position in the canvas
+      const x = event.clientX - event.currentTarget.getBoundingClientRect().x;
+      const y = event.clientY - event.currentTarget.getBoundingClientRect().y;
 
-    // broadcast the cursor position to other users
-    updateMyPresence({
-      cursor: {
-        x,
-        y,
-      },
-    });
+      // broadcast the cursor position to other users
+      updateMyPresence({
+        cursor: {
+          x,
+          y,
+        },
+      });
+    }
   }, []);
 
   // Hide the cursor when the mouse leaves the canvas
@@ -75,18 +91,37 @@ const Live = () => {
   }, []);
 
   // Show the cursor when the mouse enters the canvas
-  const handlePointerDown = useCallback((event: React.PointerEvent) => {
-    // get the cursor position in the canvas
-    const x = event.clientX - event.currentTarget.getBoundingClientRect().x;
-    const y = event.clientY - event.currentTarget.getBoundingClientRect().y;
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent) => {
+      // get the cursor position in the canvas
+      const x = event.clientX - event.currentTarget.getBoundingClientRect().x;
+      const y = event.clientY - event.currentTarget.getBoundingClientRect().y;
 
-    updateMyPresence({
-      cursor: {
-        x,
-        y,
-      },
-    });
-  }, []);
+      updateMyPresence({
+        cursor: {
+          x,
+          y,
+        },
+      });
+
+      // if cursor is in reaction mode, set isPressed to true
+      setCursorState((state: CursorState) =>
+        cursorState.mode === CursorMode.Reaction
+          ? { ...state, isPressed: true }
+          : state
+      );
+    },
+    [cursorState.mode, setCursorState]
+  );
+
+  // hide the cursor when the mouse is up
+  const handlePointerUp = useCallback(() => {
+    setCursorState((state: CursorState) =>
+      cursorState.mode === CursorMode.Reaction
+        ? { ...state, isPressed: false }
+        : state
+    );
+  }, [cursorState.mode, setCursorState]);
 
   return (
     <div
@@ -95,9 +130,11 @@ const Live = () => {
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
       <h1 className="font-2xl text-white">Liveblocks Figma Clone</h1>
 
+      {/* If cursor is in chat mode, show the chat cursor */}
       {cursor && (
         <CursorChat
           cursor={cursor}
@@ -106,6 +143,13 @@ const Live = () => {
           updateMyPresence={updateMyPresence}
         />
       )}
+
+      {/* If cursor is in reaction selector mode, show the reaction selector */}
+      {cursorState.mode === CursorMode.ReactionSelector && (
+        <ReactionSelector setReaction={setReactions} />
+      )}
+
+      {/* Show the live cursors of other users */}
       <LiveCursors others={others} />
     </div>
   );
