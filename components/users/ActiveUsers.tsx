@@ -2,35 +2,50 @@ import { useOthers, useSelf } from "@/liveblocks.config";
 import { Avatar } from "./Avatar";
 import { generateRandomName } from "@/lib/utils";
 
+import styles from "./index.module.css";
+import { useMemo } from "react";
+
 const ActiveUsers = () => {
   const users = useOthers();
   const currentUser = useSelf();
   const hasMoreUsers = users.length > 3;
 
-  return (
-    <main className="flex h-screen w-full select-none place-content-center place-items-center">
-      <div className="flex pl-3">
-        {currentUser && (
-          <Avatar name="You" otherStyles="border-[3px] bordr-primary-green" />
-        )}
-        {users.slice(0, 3).map(({ connectionId, info }) => {
-          return (
+  const memoizedUsers = useMemo(() => {
+    return (
+      <div className="flex items-center justify-center gap-1 py-2">
+        <div className="flex pl-3">
+          {currentUser && (
             <Avatar
-              key={connectionId}
-              name={generateRandomName()}
-              otherStyles="-ml-3"
+              name="You"
+              otherStyles="border-[3px] border-primary-green"
             />
-          );
-        })}
+          )}
+          {users.slice(0, 3).map(({ connectionId }) => {
+            return (
+              <Avatar
+                key={connectionId}
+                name={generateRandomName()}
+                otherStyles="-ml-3"
+              />
+            );
+          })}
 
-        {hasMoreUsers && <div className={styles.more}>+{users.length - 3}</div>}
+          {hasMoreUsers && (
+            <div className={styles.more}>+{users.length - 3}</div>
+          )}
 
-        {currentUser && (
-          <Avatar name="You" otherStyles="border-[3px] bordr-primary-green" />
-        )}
+          {currentUser && (
+            <Avatar
+              name="You"
+              otherStyles="border-[3px] border-primary-green"
+            />
+          )}
+        </div>
       </div>
-    </main>
-  );
+    );
+  }, [users.length]);
+
+  return memoizedUsers;
 };
 
 export default ActiveUsers;
