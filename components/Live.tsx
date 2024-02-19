@@ -14,7 +14,11 @@ import ReactionSelector from "./reaction/ReactionButton";
 import useInterval from "@/public/assets/hooks/useInterval";
 import FlyingReaction from "./reaction/FlyingReaction";
 
-const Live = () => {
+type Props = {
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+};
+
+const Live = ({ canvasRef }: Props) => {
   const others = useOthers();
   const [{ cursor }, updateMyPresence] = useMyPresence() as any;
 
@@ -188,7 +192,7 @@ const Live = () => {
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
     >
-      <canvas />
+      <canvas ref={canvasRef} />
 
       {/* Render the reactions */}
       {reaction.map((r) => (
