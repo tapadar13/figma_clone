@@ -181,14 +181,14 @@ const Live = () => {
 
   return (
     <div
-      className="flex h-[100vh] w-full justify-center items-center text-center border-2 border-green-500"
+      className="flex h-[100vh] w-full justify-center items-center text-center"
       id="canvas"
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
     >
-      <h1 className="font-2xl text-white">Liveblocks Figma Clone</h1>
+      <canvas />
 
       {/* Render the reactions */}
       {reaction.map((r) => (
