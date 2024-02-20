@@ -9,6 +9,16 @@ const nextConfig = {
       },
     ],
   },
+
+  webpack: (config) => {
+    // Add a new rule for handling .node files
+    config.module.rules.push({
+      test: /\.node$/,
+      use: "native-addon-loader",
+    });
+
+    return config;
+  },
 };
 
 export default nextConfig;
