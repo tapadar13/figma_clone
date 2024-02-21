@@ -10,9 +10,11 @@ import RightSidebar from "@/components/RightSidebar";
 import {
   handleCanvasMouseDown,
   handleCanvasMouseUp,
+  handleCanvasObjectModified,
   handleCanvaseMouseMove,
   handleResize,
   initializeFabric,
+  renderCanvas,
 } from "@/lib/canvas";
 import { ActiveElement } from "@/types/type";
 import { useMutation, useStorage } from "@/liveblocks.config";
@@ -96,10 +98,30 @@ export default function Page() {
       });
     });
 
+    // listen to the object modified event on the canvas which is fired
+    // when the user modifies an object on the canvas. Basically, when the
+    // user changes the width, height, color etc properties/attributes of
+    // the object or moves the object on the canvas
+    canvas.on("object:modified", (options) => {
+      handleCanvasObjectModified({
+        options,
+        syncShapeInStorage,
+      });
+    });
+
     window.addEventListener("resize", () => {
       handleResize({ fabricRef });
     });
   }, []);
+
+  // render the canvas when the canvasObjects from live storage changes
+  useEffect(() => {
+    renderCanvas({
+      fabricRef,
+      canvasObjects,
+      activeObjectRef,
+    });
+  }, [canvasObjects]);
 
   const handleActiveElement = (elem: ActiveElement) => {
     setActiveElement(elem);
