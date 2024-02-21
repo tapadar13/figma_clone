@@ -18,6 +18,7 @@ import {
 } from "@/lib/canvas";
 import { ActiveElement } from "@/types/type";
 import { useMutation, useStorage } from "@/liveblocks.config";
+import { defaultNavElement } from "@/constants";
 
 interface InitializeFabricProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -123,8 +124,42 @@ export default function Page() {
     });
   }, [canvasObjects]);
 
+  // deleteAllShapes is a mutation that deletes all the shapes from the
+  // key-value store of liveblocks
+  // We're using this mutation to delete all the shapes from the key-value store when the user clicks on the reset button
+  const deleteAllShapes = useMutation(({ storage }) => {
+    // get the canvasObjects store
+    const canvasObjects = storage.get("canvasObjects");
+
+    // if the store doesn't exist or is empty, return
+    if (!canvasObjects || canvasObjects.size === 0) return true;
+
+    // delete all the shapes from the store
+    for (const [key, value] of canvasObjects.entries()) {
+      canvasObjects.delete(key);
+    }
+
+    // return true if the store is empty
+    return canvasObjects.size === 0;
+  }, []);
+
   const handleActiveElement = (elem: ActiveElement) => {
     setActiveElement(elem);
+
+    switch (elem?.value) {
+      // delete all the shapes from the canvas
+      case "reset":
+        // clear the storage
+        deleteAllShapes();
+        // clear the canvas
+        fabricRef.current?.clear();
+        // set "select" as the active element
+        setActiveElement(defaultNavElement);
+        break;
+
+      default:
+        break;
+    }
 
     selectedShapeRef.current = elem?.value as string;
   };
