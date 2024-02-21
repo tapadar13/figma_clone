@@ -19,6 +19,7 @@ import {
 import { ActiveElement } from "@/types/type";
 import { useMutation, useStorage } from "@/liveblocks.config";
 import { defaultNavElement } from "@/constants";
+import { handleDelete } from "@/lib/key-events";
 
 interface InitializeFabricProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -113,6 +114,10 @@ export default function Page() {
     window.addEventListener("resize", () => {
       handleResize({ fabricRef });
     });
+
+    return () => {
+      canvas.dispose();
+    };
   }, []);
 
   // render the canvas when the canvasObjects from live storage changes
@@ -143,6 +148,15 @@ export default function Page() {
     return canvasObjects.size === 0;
   }, []);
 
+  // deleteShapeFromStorage is a mutation that deletes a shape from the
+  // key-value store of liveblocks
+  // We're using this mutation to delete a shape from the key-value store when
+  // the user deletes a shape from the canvas
+  const deleteShapeFromStorage = useMutation(({ storage }, shapeId) => {
+    const canvasObjects = storage.get("canvasObjects");
+    canvasObjects.delete(shapeId);
+  }, []);
+
   const handleActiveElement = (elem: ActiveElement) => {
     setActiveElement(elem);
 
@@ -153,6 +167,14 @@ export default function Page() {
         deleteAllShapes();
         // clear the canvas
         fabricRef.current?.clear();
+        // set "select" as the active element
+        setActiveElement(defaultNavElement);
+        break;
+
+      // delete the selected shape from the canvas
+      case "delete":
+        // delete it from the canvas
+        handleDelete(fabricRef.current as any, deleteShapeFromStorage);
         // set "select" as the active element
         setActiveElement(defaultNavElement);
         break;
