@@ -17,9 +17,9 @@ import {
   renderCanvas,
 } from "@/lib/canvas";
 import { ActiveElement } from "@/types/type";
-import { useMutation, useStorage } from "@/liveblocks.config";
+import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
 import { defaultNavElement } from "@/constants";
-import { handleDelete } from "@/lib/key-events";
+import { handleDelete, handleKeyDown } from "@/lib/key-events";
 
 interface InitializeFabricProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -27,6 +27,9 @@ interface InitializeFabricProps {
 }
 
 export default function Page() {
+  const undo = useUndo();
+  const redo = useRedo();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const isDrawing = useRef(false);
@@ -114,6 +117,17 @@ export default function Page() {
     window.addEventListener("resize", () => {
       handleResize({ fabricRef });
     });
+
+    window.addEventListener("keydown", (e) =>
+      handleKeyDown({
+        e,
+        canvas: fabricRef.current,
+        undo,
+        redo,
+        syncShapeInStorage,
+        deleteShapeFromStorage,
+      })
+    );
 
     return () => {
       canvas.dispose();
