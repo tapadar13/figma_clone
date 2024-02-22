@@ -20,6 +20,7 @@ import { ActiveElement } from "@/types/type";
 import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
 import { defaultNavElement } from "@/constants";
 import { handleDelete, handleKeyDown } from "@/lib/key-events";
+import { handleImageUpload } from "@/lib/shapes";
 
 interface InitializeFabricProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -36,6 +37,7 @@ export default function Page() {
   const shapeRef = useRef<fabric.Object | null>(null);
   const selectedShapeRef = useRef<string | null>(null);
   const activeObjectRef = useRef<fabric.Object | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const canvasObjects = useStorage((root) => root.canvasObjects);
 
@@ -193,6 +195,21 @@ export default function Page() {
         setActiveElement(defaultNavElement);
         break;
 
+      // upload an image to the canvas
+      case "image":
+        // trigger the click event on the input element which opens the file dialog
+        imageInputRef.current?.click();
+        // set drawing mode to false
+        // If the user is drawing on the canvas, we want to stop the
+        // drawing mode when clicked on the image item from the dropdown.
+        isDrawing.current = false;
+
+        if (fabricRef.current) {
+          // disable the drawing mode of canvas
+          fabricRef.current.isDrawingMode = false;
+        }
+        break;
+
       default:
         break;
     }
@@ -205,6 +222,17 @@ export default function Page() {
       <Navbar
         activeElement={activeElement}
         handleActiveElement={handleActiveElement}
+        imageInputRef={imageInputRef}
+        handleImageUpload={(e: any) => {
+          e.stopPropagation();
+
+          handleImageUpload({
+            file: e.target.files[0],
+            canvas: fabricRef as any,
+            shapeRef,
+            syncShapeInStorage,
+          });
+        }}
       />
 
       <section className="flex h-full flex-row">
