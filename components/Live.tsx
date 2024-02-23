@@ -13,6 +13,7 @@ import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButton";
 import useInterval from "@/public/assets/hooks/useInterval";
 import FlyingReaction from "./reaction/FlyingReaction";
+import { Comments } from "./comments/Comments";
 
 type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -185,7 +186,7 @@ const Live = ({ canvasRef }: Props) => {
 
   return (
     <div
-      className="flex h-[100vh] w-full justify-center items-center text-center"
+      className="relative flex h-full w-full flex-1 justify-center items-center"
       id="canvas"
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
@@ -222,6 +223,8 @@ const Live = ({ canvasRef }: Props) => {
 
       {/* Show the live cursors of other users */}
       <LiveCursors others={others} />
+
+      <Comments />
     </div>
   );
 };
