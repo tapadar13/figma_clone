@@ -1,6 +1,6 @@
 "use client";
 
-import { Attributes, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
 
 import Live from "@/components/Live";
@@ -14,11 +14,12 @@ import {
   handleCanvasObjectScaling,
   handleCanvasSelectionCreated,
   handleCanvaseMouseMove,
+  handlePathCreated,
   handleResize,
   initializeFabric,
   renderCanvas,
 } from "@/lib/canvas";
-import { ActiveElement } from "@/types/type";
+import { ActiveElement, Attributes } from "@/types/type";
 import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
 import { defaultNavElement } from "@/constants";
 import { handleDelete, handleKeyDown } from "@/lib/key-events";
@@ -83,7 +84,7 @@ export default function Page() {
 
     // listen to the mouse down event on the canvas which is fired when the
     // user clicks on the canvas
-    canvas.on("mouse:down", (options) => {
+    canvas.on("mouse:down", (options: any) => {
       handleCanvasMouseDown({
         options,
         canvas,
@@ -95,7 +96,7 @@ export default function Page() {
 
     // listen to the mouse move event on the canvas which is fired when the
     //  user moves the mouse on the canvas
-    canvas.on("mouse:move", (options) => {
+    canvas.on("mouse:move", (options: any) => {
       handleCanvaseMouseMove({
         options,
         canvas,
@@ -124,7 +125,7 @@ export default function Page() {
     // when the user modifies an object on the canvas. Basically, when the
     // user changes the width, height, color etc properties/attributes of
     // the object or moves the object on the canvas
-    canvas.on("object:modified", (options) => {
+    canvas.on("object:modified", (options: any) => {
       handleCanvasObjectModified({
         options,
         syncShapeInStorage,
@@ -132,7 +133,7 @@ export default function Page() {
     });
 
     // listen to the selection created event on the canvas which is fired when the user selects an object on the canvas
-    canvas.on("selection:created", (options) => {
+    canvas.on("selection:created", (options: any) => {
       handleCanvasSelectionCreated({
         options,
         isEditingRef,
@@ -141,10 +142,18 @@ export default function Page() {
     });
 
     // listen to the scaling event on the canvas which is fired when the user scales an object on the canvas
-    canvas.on("object:scaling", (options) => {
+    canvas.on("object:scaling", (options: any) => {
       handleCanvasObjectScaling({
         options,
         setElementAttributes,
+      });
+    });
+
+    // listen to the path created event on the canvas which is fired when the user creates a path on the canvas using the freeform drawing mode
+    canvas.on("path:created", (options: any) => {
+      handlePathCreated({
+        options,
+        syncShapeInStorage,
       });
     });
 
