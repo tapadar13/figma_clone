@@ -1,5 +1,6 @@
 import { LiveMap, createClient } from "@liveblocks/client";
 import { createRoomContext } from "@liveblocks/react";
+import { ReactionEvent } from "./types/type";
 
 const client = createClient({
   throttle: 16,
@@ -12,7 +13,13 @@ const client = createClient({
   },
 });
 
-type Presence = {};
+export type Presence = {
+  cursor: {
+    x: number;
+    y: number;
+  } | null;
+  message: string | null;
+};
 
 type Storage = {
   canvasObjects: LiveMap<string, any>;
@@ -20,7 +27,7 @@ type Storage = {
 
 type UserMeta = {};
 
-type RoomEvent = {};
+type RoomEvent = ReactionEvent;
 
 export type ThreadMetadata = {
   resolved: boolean;

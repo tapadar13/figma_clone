@@ -6,9 +6,8 @@ import {
   useBroadcastEvent,
   useEventListener,
   useMyPresence,
-  useOthers,
 } from "@/liveblocks.config";
-import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
+import { CursorMode, CursorState, Reaction } from "@/types/type";
 import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButton";
 import useInterval from "@/public/assets/hooks/useInterval";
@@ -29,8 +28,7 @@ type Props = {
 };
 
 const Live = ({ canvasRef, undo, redo }: Props) => {
-  const others = useOthers();
-  const [{ cursor }, updateMyPresence] = useMyPresence() as any;
+  const [{ cursor }, updateMyPresence] = useMyPresence();
 
   // track the state of the cursor (hidden, chat, reaction, reaction selector)
   const [cursorState, setCursorState] = useState<CursorState>({
@@ -77,7 +75,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
 
   // Listen to events broadcasted by other users
   useEventListener((eventData) => {
-    const event = eventData.event as ReactionEvent;
+    const event = eventData.event;
     setReaction((reactions) =>
       reactions.concat([
         {
@@ -267,7 +265,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
         )}
 
         {/* Show the live cursors of other users */}
-        <LiveCursors others={others} />
+        <LiveCursors />
 
         {/* Show the comments */}
         <Comments />
