@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@liveblocks/client": "^1.10.0",
+    "@liveblocks/core": "^1.10.0",
     "@liveblocks/node": "^1.10.0",
     "@liveblocks/react": "^1.10.0",
     "@liveblocks/react-comments": "^1.10.0",

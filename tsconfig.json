@@ -4,16 +4,13 @@
     "target": "es2018",
     "moduleResolution": "bundler",
     "typeRoots": ["./types"],
-    "downlevelIteration": true,
+    // "downlevelIteration": true,
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    // "module": "esnext",
-    // "module": "commonjs",
     "module": "esnext",
-    // "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -25,9 +22,7 @@
     ],
     "paths": {
       "@/*": ["./*"]
-      // "@liveblocks/client": ["node_modules/@liveblocks/client"]
     }
-    // "noEmit": true
   },
   "include": [
     "next-env.d.ts",
